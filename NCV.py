@@ -1,5 +1,7 @@
 import csv
 import os
+import numpy as np
+import matplotlib.pyplot as plt
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 OUTPUT_FILE = os.path.join(os.path.dirname(__file__), "ncv_results.csv")
@@ -134,6 +136,48 @@ def main():
         writer.writerows(results)
 
     print(f"\nResults written to {OUTPUT_FILE}")
+    plot_travel_time_vs_distance()
+
+
+BACKUP_FILE = os.path.join(os.path.dirname(__file__), "data", "exp2_backup.csv")
+
+
+def plot_travel_time_vs_distance():
+    distances, travel_times = [], []
+    with open(BACKUP_FILE, newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            distances.append(float(row["Distance (mm)"]))
+            travel_times.append(float(row["Time(ms)"]))
+    distances = np.array(distances)
+    travel_times = np.array(travel_times)
+
+    slope, intercept = np.polyfit(distances, travel_times, 1)
+    fit_line = slope * distances + intercept
+    ss_res = np.sum((travel_times - fit_line) ** 2)
+    ss_tot = np.sum((travel_times - travel_times.mean()) ** 2)
+    r2 = 1 - ss_res / ss_tot
+
+    x_range = np.linspace(distances.min() - 2, distances.max() + 2, 200)
+
+    _, ax = plt.subplots(figsize=(6, 4))
+
+    ax.scatter(distances, travel_times, color="#2563EB", s=60, zorder=3,
+               label="Trials")
+    ax.plot(x_range, slope * x_range + intercept, color="#DC2626", linewidth=1.5,
+            label=f"y = {slope:.4f}x + {intercept:.4f}\n$R^2$ = {r2:.4f}")
+
+    ax.set_xlabel("Distance (mm)")
+    ax.set_ylabel("Travel Time (ms)")
+    ax.set_title("AP Travel Time vs. Electrode Separation")
+    ax.legend(framealpha=0.9)
+    ax.grid(True, linewidth=0.5, alpha=0.5)
+    ax.spines[["top", "right"]].set_visible(False)
+
+    plt.tight_layout()
+    out_path = os.path.join(os.path.dirname(__file__), "ncv_travel_time.png")
+    plt.savefig(out_path, dpi=300)
+    print(f"Plot saved to {out_path}")
 
 
 if __name__ == "__main__":
