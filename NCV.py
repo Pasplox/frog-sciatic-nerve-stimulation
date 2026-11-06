@@ -152,23 +152,23 @@ def plot_travel_time_vs_distance():
     distances = np.array(distances)
     travel_times = np.array(travel_times)
 
-    slope, intercept = np.polyfit(distances, travel_times, 1)
-    fit_line = slope * distances + intercept
-    ss_res = np.sum((travel_times - fit_line) ** 2)
-    ss_tot = np.sum((travel_times - travel_times.mean()) ** 2)
+    slope, intercept = np.polyfit(travel_times, distances, 1)
+    fit_line = slope * travel_times + intercept
+    ss_res = np.sum((distances - fit_line) ** 2)
+    ss_tot = np.sum((distances - distances.mean()) ** 2)
     r2 = 1 - ss_res / ss_tot
 
-    x_range = np.linspace(distances.min() - 2, distances.max() + 2, 200)
+    x_range = np.linspace(travel_times.min() - 0.05, travel_times.max() + 0.05, 200)
 
     _, ax = plt.subplots(figsize=(6, 4))
 
-    ax.scatter(distances, travel_times, color="#2563EB", s=60, zorder=3,
+    ax.scatter(travel_times, distances, color="#2563EB", s=60, zorder=3,
                label="Trials")
     ax.plot(x_range, slope * x_range + intercept, color="#DC2626", linewidth=1.5,
             label=f"y = {slope:.4f}x + {intercept:.4f}\n$R^2$ = {r2:.4f}")
 
-    ax.set_xlabel("Distance (mm)")
-    ax.set_ylabel("Travel Time (ms)")
+    ax.set_xlabel("Travel Time (ms)")
+    ax.set_ylabel("Distance (mm)")
     ax.set_title("AP Travel Time vs. Electrode Separation")
     ax.legend(framealpha=0.9)
     ax.grid(True, linewidth=0.5, alpha=0.5)
