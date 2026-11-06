@@ -16,7 +16,8 @@ current_uA  = []
 with open(os.path.join(DATA_DIR, "exp3.csv"), newline="") as f:
     reader = csv.DictReader(f)
     for row in reader:
-        duration_ms.append(float(row["Duration (ms)"]))
+        # CSV labels duration as "ms" but values are in µs (confirmed by source xlsx)
+        duration_ms.append(float(row["Duration (ms)"]) / 1000)
         current_uA.append(float(row["Current(µA)"]))
 
 duration_ms = np.array(duration_ms)
@@ -49,7 +50,7 @@ ax.set_title("Strength-Duration Curve — Frog Sciatic Nerve")
 ax.axhline(b, linestyle=":", color="#888888", linewidth=1.2,
            label=f"Rheobase (b) = {b:.1f} µA")
 ax.axvline(c, linestyle=":", color="#4a90d9", linewidth=1.2,
-           label=f"Chronaxie (c) = {c:.1f} ms")
+           label=f"Chronaxie (c) = {c:.3f} ms")
 ax.legend(fontsize=9)
 
 ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.6)
